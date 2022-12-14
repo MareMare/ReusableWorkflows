@@ -36,3 +36,12 @@ jobs:
 完全な例は [call-ci.net6.yml](/.github/workflows/call-ci.net6.yml) を参照。
 
 </details>
+
+
+> **Note**
+> どうやら private repo 内のワークフローやアクションを利用できるようになったみたい。
+> * [GitHub Actions \- Sharing actions and reusable workflows from private repositories is now GA \| GitHub Changelog](https://github.blog/changelog/2022-12-14-github-actions-sharing-actions-and-reusable-workflows-from-private-repositories-is-now-ga/)
+> * [リポジトリの GitHub Actions の設定を管理する \- GitHub Docs](https://docs.github.com/ja/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository)
+>
+> あとで試してみます。
+> 
