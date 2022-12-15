@@ -1,0 +1,92 @@
+# このワークフローは他のワークフローから再利用されます。
+name: Bump nuget packages
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: 'Specifies the directory containing the sln or *proj files to be built.'
+        required: true
+        type: string
+      version-lock:
+        description: 'Specifies whether the package should be locked to the current Major or Minor version. Possible values: None, Major or Minor.'
+        required: false
+        type: string
+      include-packages-csv:
+        description: 'Specifies to only look at packages where the name contains the provided string. Culture and case insensitive.'
+        required: false
+        type: string
+      exclude-packages-csv:
+        description: 'Specifies to only look at packages where the name does not contain the provided string. Culture and case insensitive.'
+        required: false
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  bump-nuget-packages:
+    name: 🐝 Bump
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+    - name: 🛒 Checkout
+      uses: actions/checkout@v3
+    - name: ✨ Setup .NET 6.0
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: 🔧 Install tools
+      run: dotnet tool install --global dotnet-outdated-tool
+    - name: 🐝 Bump nuget packages
+      id: outdated
+      run: |
+        . "./.github/scripts/bump-nuget-packages/bump-nuget-packages.ps1"
+
+        # directory containing a .NET solution/project.
+        $Private:projectDirectory = "${{ inputs.working-directory }}"
+        $Private:versionLock = "${{ inputs.version-lock }}" # "None" / "Major" / "Minor"
+        $Private:includePackagesCsv = "${{ inputs.include-packages-csv }}"
+        $Private:excludePackagesCsv = "${{ inputs.exclude-packages-csv }}"
+
+        $Private:outputCsvFile = "outdated-result.csv"
+
+        # dotnet-outdated ツールを実行します。
+        $Private:hasBeenChanged = Invoke-Dotnet-Outdated `
+          -Directory $Private:projectDirectory `
+          -OutputCsvFile $Private:outputCsvFile `
+          -VersionLock $Private:versionLock `
+          -IncludePackagesCsv $Private:includePackagesCsv `
+          -ExcludePackagesCsv $Private:excludePackagesCsv
+
+        $Private:prBodyMessage = ""
+        if ($Private:hasBeenChanged -eq $true){
+          # PR メッセージを生成し、更新結果のファイルを削除します。
+          $Private:prBodyMessage = Get-ReportBodyText -Csv_file $Private:outputCsvFile
+          Remove-Item -Path $Private:outputCsvFile
+        }
+
+        # 環境変数へ結果を格納します。
+        echo "HAS_CHANGED=$Private:hasBeenChanged" >> $env:GITHUB_ENV
+        if ($Private:hasBeenChanged -eq $true){
+          "PR_BODY<<EOF" >> $env:GITHUB_ENV
+          $Private:prBodyMessage >> $env:GITHUB_ENV
+          "EOF" >> $env:GITHUB_ENV
+        }
+
+    - name: 🔀 Create Pull Request
+      if: ${{ env.HAS_CHANGED == 'true' }}
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.token }}
+        commit-message: '⬆️ Bump nuget packages.'
+        author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+        branch: dependencies/update
+        title: '⬆️ Bump nuget packages.'
+        body: "${{ env.PR_BODY }}"
+        labels: dependencies
+        assignees: ${{ github.repository_owner }}
+        reviewers: ${{ github.repository_owner }}
