@@ -37,6 +37,42 @@ jobs:
 
 </details>
 
+## `ci.net7.yml`
+.NET7 Build & UnitTests のための再利用可能なワークフローです。
+
+<details>
+<summary>呼び出し例:</summary>
+<div>
+
+```yml
+jobs:
+  dotnet-build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            osName: Linux
+          - os: windows-latest
+            osName: Windows
+    name: Test on ${{ matrix.osName }}
+    permissions:
+      contents: read
+    uses: MareMare/ReusableWorkflows/.github/workflows/ci.net7.yml@main
+    with:
+      runner-os: ${{ matrix.os }}
+      working-directory: src
+      testing-directory: src
+      run-unittest: 'true'
+      unittest-filter: 'Category!=local'
+```
+
+完全な例は [call-ci.net7.yml](/.github/workflows/call-ci.net7.yml) を参照。
+
+</details>
+
+
+## あとで試してみようかな
 
 > **Note**
 > どうやら private repo 内のワークフローやアクションを利用できるようになったみたい。
