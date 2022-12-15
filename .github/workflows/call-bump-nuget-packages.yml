@@ -1,0 +1,23 @@
+name: Call bump-nuget-packages.yml
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bump-nuget-packages:
+    name: nuget packages
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: MareMare/ReusableWorkflows/.github/workflows/bump-nuget-packages.yml@main
+    with:
+      working-directory: src
+      version-lock: 'Major'
+      include-packages-csv: ''
+      exclude-packages-csv: ''
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      # token: ${{ secrets.PAT_REPO_RW_ALL }}

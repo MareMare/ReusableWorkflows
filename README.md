@@ -3,6 +3,34 @@ A repository of reusable workflows for personal use.
 
 個人的に使用する再利用可能なワークフローのリポジトリです。
 
+## `bump-nuget-packages.yml`
+Bump nuget packages のための再利用可能なワークフローです。
+
+<details>
+<summary>呼び出し例:</summary>
+<div>
+
+```yml
+jobs:
+  bump-nuget-packages:
+    name: nuget packages
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: MareMare/ReusableWorkflows/.github/workflows/bump-nuget-packages.yml@main
+    with:
+      working-directory: src
+      version-lock: 'Major'
+      include-packages-csv: ''
+      exclude-packages-csv: ''
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+完全な例は [call-bump-nuget-packages.yml](/.github/workflows/call-bump-nuget-packages.yml) を参照。
+
+</details>
+
 ## `ci.net6.yml`
 .NET6 Build & UnitTests のための再利用可能なワークフローです。
 
@@ -71,7 +99,7 @@ jobs:
 
 </details>
 
-
+---
 ## あとで試してみようかな
 
 > **Note**
