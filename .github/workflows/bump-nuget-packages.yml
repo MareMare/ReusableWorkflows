@@ -79,7 +79,7 @@ jobs:
     - name: 🔀 Create Pull Request
       if: ${{ env.HAS_CHANGED == 'true' }}
       id: cpr
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v6
       with:
         token: ${{ secrets.token }}
         commit-message: '⬆️ Bump nuget packages.'
